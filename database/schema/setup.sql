@@ -1,6 +1,15 @@
 USE master;
 GO
 
+IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'collegeapp')
+BEGIN
+    CREATE LOGIN collegeapp WITH PASSWORD = 'StrongPassword123!';
+END
+GO
+
+USE master;
+GO
+
 IF EXISTS (SELECT name FROM sys.databases WHERE name = 'CollegeDB')
 BEGIN
     ALTER DATABASE CollegeDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
@@ -10,6 +19,17 @@ GO
 
 CREATE DATABASE CollegeDB;
 GO
+
+USE CollegeDB;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'collegeapp')
+BEGIN
+    CREATE USER collegeapp FOR LOGIN collegeapp;
+    ALTER ROLE db_owner ADD MEMBER collegeapp;
+END
+GO
+
 
 USE CollegeDB;
 GO
