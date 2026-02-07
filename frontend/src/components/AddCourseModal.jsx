@@ -5,6 +5,7 @@ const API_URL = 'http://localhost:5000/api';
 
 function AddCourseModal({ studentId, onAdd, onClose }) {
   const [availableSections, setAvailableSections] = useState([]);
+  const [prerequisites, setPrerequisites] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [semester] = useState('Winter');
@@ -20,6 +21,22 @@ function AddCourseModal({ studentId, onAdd, onClose }) {
         params: { semester, year, search: searchTerm }
       });
       setAvailableSections(response.data);
+      
+      // Fetch prerequisites for each unique course
+      const uniqueCourses = [...new Set(response.data.map(s => s.Course_ID))];
+      const prereqPromises = uniqueCourses.map(courseId => 
+        axios.get(`${API_URL}/course/${courseId}/prerequisites`)
+          .then(res => ({ courseId, prereqs: res.data }))
+          .catch(() => ({ courseId, prereqs: [] }))
+      );
+      
+      const prereqResults = await Promise.all(prereqPromises);
+      const prereqMap = {};
+      prereqResults.forEach(({ courseId, prereqs }) => {
+        prereqMap[courseId] = prereqs;
+      });
+      
+      setPrerequisites(prereqMap);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching sections:', err);
@@ -28,8 +45,22 @@ function AddCourseModal({ studentId, onAdd, onClose }) {
   };
 
   const formatTime = (timeString) => {
-    if (!timeString) return '';
-    return timeString.substring(0, 5);
+    if (!timeString) return 'TBA';
+    
+    if (timeString.includes(':')) {
+      const parts = timeString.split(':');
+      const hours = parseInt(parts[0]);
+      const minutes = parts[1];
+      
+      if (hours === 0) return 'TBA';
+      
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+      
+      return `${displayHours}:${minutes}${period}`;
+    }
+    
+    return timeString;
   };
 
   return (
@@ -59,8 +90,16 @@ function AddCourseModal({ studentId, onAdd, onClose }) {
                 <div key={section.Section_ID} className="section-item">
                   <div>
                     <h4>{section.Course_ID} - {section.Course_name}</h4>
+                    
+                    {/* NEW: Show Prerequisites */}
+                    {prerequisites[section.Course_ID] && prerequisites[section.Course_ID].length > 0 && (
+                      <p className="prerequisites-info">
+                        <strong>Prerequisites:</strong> {prerequisites[section.Course_ID].map(p => p.Prereq_course_ID).join(', ')}
+                      </p>
+                    )}
+                    
                     <p><strong>Instructor:</strong> {section.Instructor_name || 'TBA'}</p>
-                    <p><strong>Schedule:</strong> {section.Day || 'TBA'} {formatTime(section.Start_time)}-{formatTime(section.End_time)}</p>
+                    <p><strong>Schedule:</strong> {section.Day || 'TBA'} {formatTime(section.Start_time)} - {formatTime(section.End_time)}</p>
                     <p><strong>Room:</strong> {section.Building}-{section.Room_number}</p>
                     <p className="seats-available">
                       {section.Available_seats} seats available (out of {section.Max_enrollment})

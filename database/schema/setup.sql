@@ -532,6 +532,7 @@ BEGIN
         
         SELECT @CourseID = Course_ID FROM Section WHERE Section_ID = @SectionID;
         
+        -- NEW: Check if already in cart for THIS section
         IF EXISTS (SELECT 1 FROM Shopping_Cart 
                    WHERE Student_ID = @StudentID 
                    AND Section_ID = @SectionID 
@@ -543,12 +544,42 @@ BEGIN
             RETURN;
         END
         
+        -- NEW: Check if already in cart for ANY section of the SAME COURSE
+        IF EXISTS (
+            SELECT 1 FROM Shopping_Cart sc
+            INNER JOIN Section s ON sc.Section_ID = s.Section_ID
+            WHERE sc.Student_ID = @StudentID 
+            AND s.Course_ID = @CourseID
+            AND sc.Status = 'Pending'
+        )
+        BEGIN
+            SET @Success = 0;
+            SET @Message = 'You already have another section of ' + @CourseID + ' in your cart.';
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+        
+        -- NEW: Check if already enrolled in THIS section
         IF EXISTS (SELECT 1 FROM Takes 
                    WHERE Student_ID = @StudentID 
                    AND Section_ID = @SectionID)
         BEGIN
             SET @Success = 0;
             SET @Message = 'Already enrolled in this section.';
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+        
+        -- NEW: Check if already enrolled OR completed ANY section of the SAME COURSE
+        IF EXISTS (
+            SELECT 1 FROM Takes t
+            INNER JOIN Section s ON t.Section_ID = s.Section_ID
+            WHERE t.Student_ID = @StudentID 
+            AND s.Course_ID = @CourseID
+        )
+        BEGIN
+            SET @Success = 0;
+            SET @Message = 'You are already enrolled in or have completed ' + @CourseID + '.';
             ROLLBACK TRANSACTION;
             RETURN;
         END

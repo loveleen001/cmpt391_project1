@@ -225,6 +225,26 @@ app.post('/api/register-all', async (req, res) => {
     }
 });
 
+app.get('/api/course/:courseId/prerequisites', async (req, res) => {
+    try {
+        const result = await pool.request()
+            .input('CourseID', sql.VarChar, req.params.courseId)
+            .query(`
+                SELECT 
+                    p.Prereq_course_ID,
+                    c.Course_name
+                FROM Prerequisite p
+                INNER JOIN Course c ON p.Prereq_course_ID = c.Course_ID
+                WHERE p.Course_ID = @CourseID
+                ORDER BY p.Prereq_course_ID
+            `);
+        res.json(result.recordset);
+    } catch (err) {
+        console.error('Error fetching prerequisites:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
