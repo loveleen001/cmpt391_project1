@@ -1,21 +1,29 @@
-    import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
 
 function StudentLogin({ onSelectStudent }) {
   const [students, setStudents] = useState([]);
   const [selectedId, setSelectedId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Hardcoded student data from our database
-    // In Phase 3, we'll fetch this from the actual database
-    const mockStudents = [
-      { Student_ID: 1, Name: 'Alice Thompson', Total_cred: 45, Dept_name: 'Computer Science' },
-      { Student_ID: 2, Name: 'Bob Martinez', Total_cred: 30, Dept_name: 'Computer Science' },
-      { Student_ID: 3, Name: 'Charlie Davis', Total_cred: 60, Dept_name: 'Computer Science' },
-      { Student_ID: 4, Name: 'Diana Wilson', Total_cred: 15, Dept_name: 'Computer Science' },
-      { Student_ID: 5, Name: 'Ethan Brown', Total_cred: 75, Dept_name: 'Computer Science' }
-    ];
-    setStudents(mockStudents);
+    fetchStudents();
   }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/students`);
+      setStudents(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching students:', err);
+      setError('Failed to load students. Make sure backend is running on port 5000.');
+      setLoading(false);
+    }
+  };
 
   const handleLogin = () => {
     const student = students.find(s => s.Student_ID === parseInt(selectedId));
@@ -23,6 +31,24 @@ function StudentLogin({ onSelectStudent }) {
       onSelectStudent(student);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="student-login">
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="student-login">
+        <h2>Error</h2>
+        <p style={{color: 'red'}}>{error}</p>
+        <button onClick={fetchStudents}>Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="student-login">
@@ -35,7 +61,7 @@ function StudentLogin({ onSelectStudent }) {
         <option value="">-- Select a Student --</option>
         {students.map(student => (
           <option key={student.Student_ID} value={student.Student_ID}>
-            {student.Name} (ID: {student.Student_ID})
+            {student.Name} (ID: {student.Student_ID}) - {student.Dept_name}
           </option>
         ))}
       </select>

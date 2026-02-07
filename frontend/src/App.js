@@ -7,6 +7,11 @@ import ShoppingCart from './components/ShoppingCart';
 function App() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [activeTab, setActiveTab] = useState('enrolled');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   return (
     <div className="App">
@@ -42,12 +47,25 @@ function App() {
             <p><strong>Student:</strong> {selectedStudent.Name}</p>
             <p><strong>Total Credits:</strong> {selectedStudent.Total_cred}</p>
             <p><strong>Department:</strong> {selectedStudent.Dept_name}</p>
+            <button 
+              className="logout-btn"
+              onClick={() => setSelectedStudent(null)}
+            >
+              Change Student
+            </button>
           </div>
 
           {activeTab === 'enrolled' ? (
-            <ClassList studentId={selectedStudent.Student_ID} />
+            <ClassList 
+              key={`enrolled-${refreshKey}`}
+              studentId={selectedStudent.Student_ID} 
+            />
           ) : (
-            <ShoppingCart studentId={selectedStudent.Student_ID} />
+            <ShoppingCart 
+              key={`cart-${refreshKey}`}
+              studentId={selectedStudent.Student_ID}
+              onRegisterSuccess={handleRefresh}
+            />
           )}
         </div>
       )}

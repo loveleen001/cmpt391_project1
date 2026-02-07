@@ -1,23 +1,118 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import AddCourseModal from './AddCourseModal';
 
-function ShoppingCart({ studentId }) {
+const API_URL = 'http://localhost:5000/api';
+
+function ShoppingCart({ studentId, onRegisterSuccess }) {
   const [cartItems, setCartItems] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [registering, setRegistering] = useState(false);
 
-  const handleAddToCart = (section) => {
-    setCartItems([...cartItems, section]);
-    setShowAddModal(false);
+  useEffect(() => {
+    fetchCart();
+  }, [studentId]);
+
+  const fetchCart = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/cart/${studentId}`);
+      setCartItems(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching cart:', err);
+      setLoading(false);
+    }
   };
 
-  const handleRemoveFromCart = (sectionId) => {
-    setCartItems(cartItems.filter(item => item.Section_ID !== sectionId));
+  const handleAddToCart = async (section) => {
+    try {
+      const response = await axios.post(`${API_URL}/cart/add`, {
+        studentId,
+        sectionId: section.Section_ID
+      });
+
+      if (response.data.success) {
+        alert(response.data.message);
+        fetchCart();
+        setShowAddModal(false);
+      } else {
+        alert('Failed to add: ' + response.data.message);
+      }
+    } catch (err) {
+      alert('Error: ' + (err.response?.data?.message || err.message));
+    }
   };
 
-  const handleRegister = () => {
-    alert(`Registering for ${cartItems.length} course(s)...`);
-    // In Phase 3, we'll call the sp_RegisterStudent stored procedure
+  const handleRemoveFromCart = async (sectionId) => {
+    try {
+      const response = await axios.post(`${API_URL}/cart/remove`, {
+        studentId,
+        sectionId
+      });
+
+      if (response.data.success) {
+        fetchCart();
+      } else {
+        alert('Failed to remove: ' + response.data.message);
+      }
+    } catch (err) {
+      alert('Error: ' + (err.response?.data?.message || err.message));
+    }
   };
+
+  const handleRegisterAll = async () => {
+    if (cartItems.length === 0) {
+      alert('Shopping cart is empty!');
+      return;
+    }
+
+    if (!window.confirm(`Register for ${cartItems.length} course(s)?`)) {
+      return;
+    }
+
+    setRegistering(true);
+
+    try {
+      const sectionIds = cartItems.map(item => item.Section_ID);
+      const response = await axios.post(`${API_URL}/register-all`, {
+        studentId,
+        sectionIds
+      });
+
+      const { successCount, failureCount, results } = response.data;
+
+      let message = `Registration complete!\n`;
+      message += `✅ Success: ${successCount}\n`;
+      message += `❌ Failed: ${failureCount}\n\n`;
+
+      if (failureCount > 0) {
+        message += 'Failed courses:\n';
+        results.filter(r => !r.success).forEach(r => {
+          const item = cartItems.find(i => i.Section_ID === r.sectionId);
+          message += `- ${item.Course_ID}: ${r.message}\n`;
+        });
+      }
+
+      alert(message);
+      
+      fetchCart();
+      onRegisterSuccess();
+    } catch (err) {
+      alert('Error during registration: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    return timeString.substring(0, 5);
+  };
+
+  if (loading) {
+    return <div className="shopping-cart"><p>Loading cart...</p></div>;
+  }
 
   return (
     <div className="shopping-cart">
@@ -33,11 +128,11 @@ function ShoppingCart({ studentId }) {
         <>
           <div className="cart-items">
             {cartItems.map(item => (
-              <div key={item.Section_ID} className="cart-item">
+              <div key={item.Cart_ID} className="cart-item">
                 <div>
                   <h4>{item.Course_ID} - {item.Course_name}</h4>
-                  <p>{item.Instructor} | {item.Day} {item.Start_time}-{item.End_time}</p>
-                  <p>Room: {item.Building}-{item.Room_number}</p>
+                  <p>{item.Instructor_name || 'TBA'} | {item.Day || 'TBA'} {formatTime(item.Start_time)}-{formatTime(item.End_time)}</p>
+                  <p>Room: {item.Building}-{item.Room_number} | {item.Available_seats} seats available</p>
                 </div>
                 <button 
                   className="remove-btn"
@@ -49,8 +144,12 @@ function ShoppingCart({ studentId }) {
             ))}
           </div>
 
-          <button className="register-btn" onClick={handleRegister}>
-            Register for Selected Courses ({cartItems.length})
+          <button 
+            className="register-btn" 
+            onClick={handleRegisterAll}
+            disabled={registering}
+          >
+            {registering ? 'Registering...' : `Register for Selected Courses (${cartItems.length})`}
           </button>
         </>
       )}

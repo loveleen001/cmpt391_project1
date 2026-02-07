@@ -138,12 +138,14 @@ CREATE TABLE Registration_Log (
 );
 
 PRINT 'Tables created!';
-PRINT 'Inserting sample data...';
 
 INSERT INTO Department (Dept_name, Building, Budget) VALUES 
     ('Computer Science', 'Building A', 500000),
     ('Mathematics', 'Building B', 400000),
-    ('Business', 'Building C', 600000);
+    ('Business', 'Building C', 600000),
+    ('English', 'Building D', 350000),
+    ('Biology', 'Building E', 450000),
+    ('Psychology', 'Building F', 375000);
 
 INSERT INTO Instructor (Name, Salary, Dept_name) VALUES 
     ('Dr. Sarah Johnson', 95000, 'Computer Science'),
@@ -151,64 +153,246 @@ INSERT INTO Instructor (Name, Salary, Dept_name) VALUES
     ('Dr. Emily Rodriguez', 88000, 'Computer Science'),
     ('Dr. Robert Smith', 93000, 'Mathematics'),
     ('Prof. Jennifer Brown', 89000, 'Mathematics'),
-    ('Dr. James Wilson', 98000, 'Business');
+    ('Dr. James Wilson', 98000, 'Business'),
+    ('Dr. William Thompson', 85000, 'English'),
+    ('Prof. Mary Martinez', 83000, 'English'),
+    ('Dr. Karen Jackson', 90000, 'Biology'),
+    ('Prof. Steven Harris', 88000, 'Biology'),
+    ('Dr. Nancy Clark', 89000, 'Psychology'),
+    ('Prof. Daniel Lewis', 87000, 'Psychology');
 
 UPDATE Department SET Head_Instructor_ID = 1 WHERE Dept_name = 'Computer Science';
 UPDATE Department SET Head_Instructor_ID = 4 WHERE Dept_name = 'Mathematics';
 UPDATE Department SET Head_Instructor_ID = 6 WHERE Dept_name = 'Business';
+UPDATE Department SET Head_Instructor_ID = 7 WHERE Dept_name = 'English';
+UPDATE Department SET Head_Instructor_ID = 9 WHERE Dept_name = 'Biology';
+UPDATE Department SET Head_Instructor_ID = 11 WHERE Dept_name = 'Psychology';
 
 INSERT INTO Time_Slot (Day, Start_time, End_time) VALUES 
     ('Monday', '08:00:00', '09:30:00'),
     ('Monday', '10:00:00', '11:30:00'),
     ('Monday', '12:00:00', '13:30:00'),
+    ('Monday', '14:00:00', '15:30:00'),
     ('Wednesday', '08:00:00', '09:30:00'),
     ('Wednesday', '10:00:00', '11:30:00'),
-    ('Friday', '08:00:00', '09:30:00');
+    ('Wednesday', '12:00:00', '13:30:00'),
+    ('Wednesday', '14:00:00', '15:30:00'),
+    ('Friday', '08:00:00', '09:30:00'),
+    ('Friday', '10:00:00', '11:30:00'),
+    ('Friday', '12:00:00', '13:30:00'),
+    ('Friday', '14:00:00', '15:30:00'),
+    ('Tuesday', '08:00:00', '09:30:00'),
+    ('Tuesday', '10:00:00', '11:30:00'),
+    ('Tuesday', '12:00:00', '13:30:00'),
+    ('Tuesday', '14:00:00', '15:30:00'),
+    ('Thursday', '08:00:00', '09:30:00'),
+    ('Thursday', '10:00:00', '11:30:00'),
+    ('Thursday', '12:00:00', '13:30:00'),
+    ('Thursday', '14:00:00', '15:30:00');
 
 INSERT INTO Classroom (Building, Room_number, Capacity) VALUES 
     ('Building A', '101', 30),
     ('Building A', '102', 35),
+    ('Building A', '201', 40),
     ('Building B', '101', 30),
-    ('Building C', '101', 45);
+    ('Building B', '102', 25),
+    ('Building B', '201', 35),
+    ('Building C', '101', 45),
+    ('Building C', '201', 40),
+    ('Building D', '101', 30),
+    ('Building E', '101', 35),
+    ('Building F', '101', 30);
 
 INSERT INTO Course (Course_ID, Course_name, Credits, Dept_name) VALUES 
     ('CMPT101', 'Introduction to Programming', 3, 'Computer Science'),
     ('CMPT102', 'Data Structures', 3, 'Computer Science'),
     ('CMPT201', 'Algorithms', 3, 'Computer Science'),
     ('CMPT301', 'Database Management Systems', 3, 'Computer Science'),
+    ('CMPT302', 'Operating Systems', 3, 'Computer Science'),
+    ('CMPT401', 'Software Engineering', 3, 'Computer Science'),
+    ('CMPT402', 'Artificial Intelligence', 3, 'Computer Science'),
+    ('CMPT403', 'Computer Networks', 3, 'Computer Science'),
+    ('CMPT404', 'Web Development', 3, 'Computer Science'),
     ('MATH101', 'Calculus I', 3, 'Mathematics'),
     ('MATH102', 'Calculus II', 3, 'Mathematics'),
-    ('BUS101', 'Introduction to Business', 3, 'Business');
+    ('MATH201', 'Linear Algebra', 3, 'Mathematics'),
+    ('MATH202', 'Discrete Mathematics', 3, 'Mathematics'),
+    ('MATH301', 'Statistics', 3, 'Mathematics'),
+    ('BUS101', 'Introduction to Business', 3, 'Business'),
+    ('BUS201', 'Marketing Fundamentals', 3, 'Business'),
+    ('BUS202', 'Financial Accounting', 3, 'Business'),
+    ('BUS301', 'Business Strategy', 3, 'Business'),
+    ('ENGL101', 'English Composition', 3, 'English'),
+    ('ENGL201', 'World Literature', 3, 'English'),
+    ('ENGL301', 'Advanced Writing', 3, 'English'),
+    ('BIOL101', 'General Biology', 4, 'Biology'),
+    ('BIOL201', 'Cell Biology', 4, 'Biology'),
+    ('BIOL301', 'Genetics', 4, 'Biology'),
+    ('PSYC101', 'Introduction to Psychology', 3, 'Psychology'),
+    ('PSYC201', 'Developmental Psychology', 3, 'Psychology'),
+    ('PSYC301', 'Cognitive Psychology', 3, 'Psychology');
 
 INSERT INTO Prerequisite (Course_ID, Prereq_course_ID) VALUES 
     ('CMPT102', 'CMPT101'),
     ('CMPT201', 'CMPT102'),
     ('CMPT301', 'CMPT102'),
-    ('MATH102', 'MATH101');
+    ('CMPT302', 'CMPT201'),
+    ('CMPT401', 'CMPT301'),
+    ('CMPT402', 'CMPT201'),
+    ('CMPT403', 'CMPT302'),
+    ('CMPT404', 'CMPT101'),
+    ('MATH102', 'MATH101'),
+    ('MATH201', 'MATH101'),
+    ('BUS201', 'BUS101'),
+    ('BUS301', 'BUS101'),
+    ('BIOL201', 'BIOL101'),
+    ('BIOL301', 'BIOL201'),
+    ('ENGL201', 'ENGL101'),
+    ('ENGL301', 'ENGL201'),
+    ('PSYC201', 'PSYC101'),
+    ('PSYC301', 'PSYC201');
 
 INSERT INTO Student (Name, Total_cred, Dept_name, Instructor_ID) VALUES 
     ('Alice Thompson', 45, 'Computer Science', 1),
     ('Bob Martinez', 30, 'Computer Science', 2),
     ('Charlie Davis', 60, 'Computer Science', 1),
     ('Diana Wilson', 15, 'Computer Science', 3),
-    ('Ethan Brown', 75, 'Computer Science', 2);
+    ('Ethan Brown', 75, 'Computer Science', 2),
+    ('Fiona Lee', 45, 'Computer Science', 1),
+    ('George Clark', 30, 'Computer Science', 2),
+    ('Hannah White', 60, 'Mathematics', 4),
+    ('Ian Rodriguez', 15, 'Mathematics', 5),
+    ('Julia Kim', 90, 'Business', 6);
 
 INSERT INTO Section (Course_ID, Semester, Year, Instructor_ID, Time_slot_ID, Building, Room_number, Max_enrollment, Current_enrollment) VALUES 
-    ('CMPT101', 'Winter', 2026, 1, 1, 'Building A', '101', 30, 2),
-    ('CMPT102', 'Winter', 2026, 2, 2, 'Building A', '102', 30, 2),
+    ('CMPT101', 'Winter', 2026, 1, 1, 'Building A', '101', 30, 3),
+    ('CMPT101', 'Winter', 2026, 2, 5, 'Building A', '102', 30, 0),
+    ('CMPT102', 'Winter', 2026, 2, 2, 'Building A', '102', 30, 3),
+    ('CMPT102', 'Winter', 2026, 3, 6, 'Building A', '201', 35, 0),
     ('CMPT201', 'Winter', 2026, 1, 3, 'Building A', '101', 30, 0),
     ('CMPT301', 'Winter', 2026, 3, 4, 'Building A', '102', 30, 0),
-    ('MATH101', 'Winter', 2026, 4, 5, 'Building B', '101', 30, 0),
-    ('BUS101', 'Winter', 2026, 6, 6, 'Building C', '101', 45, 0);
+    ('CMPT302', 'Winter', 2026, 2, 7, 'Building A', '201', 30, 0),
+    ('CMPT401', 'Winter', 2026, 3, 8, 'Building A', '102', 30, 0),
+    ('CMPT402', 'Winter', 2026, 1, 9, 'Building A', '201', 35, 0),
+    ('CMPT404', 'Winter', 2026, 2, 10, 'Building A', '101', 30, 0),
+    ('MATH101', 'Winter', 2026, 4, 13, 'Building B', '101', 30, 0),
+    ('MATH101', 'Winter', 2026, 5, 5, 'Building B', '102', 25, 0),
+    ('MATH102', 'Winter', 2026, 4, 14, 'Building B', '101', 30, 0),
+    ('MATH201', 'Winter', 2026, 5, 15, 'Building B', '201', 35, 0),
+    ('MATH202', 'Winter', 2026, 4, 16, 'Building B', '101', 30, 0),
+    ('BUS101', 'Winter', 2026, 6, 17, 'Building C', '101', 45, 0),
+    ('BUS201', 'Winter', 2026, 6, 18, 'Building C', '201', 40, 0),
+    ('BUS202', 'Winter', 2026, 6, 19, 'Building C', '101', 40, 0),
+    ('ENGL101', 'Winter', 2026, 7, 1, 'Building D', '101', 30, 0),
+    ('ENGL201', 'Winter', 2026, 8, 6, 'Building D', '101', 30, 0),
+    ('BIOL101', 'Winter', 2026, 9, 2, 'Building E', '101', 35, 0),
+    ('BIOL201', 'Winter', 2026, 10, 7, 'Building E', '101', 35, 0),
+    ('PSYC101', 'Winter', 2026, 11, 3, 'Building F', '101', 30, 0),
+    ('PSYC201', 'Winter', 2026, 12, 8, 'Building F', '101', 30, 0);
 
 INSERT INTO Takes (Student_ID, Section_ID, Grade) VALUES 
     (1, 1, 'A'),
-    (1, 2, 'B+'),
+    (1, 3, 'B+'),
     (2, 1, 'B'),
     (3, 1, 'A'),
-    (3, 2, 'A-');
+    (3, 3, 'A-');
 
 PRINT 'Sample data loaded!';
+GO
+
+PRINT 'Creating materialized views...';
+GO
+
+CREATE VIEW vw_StudentSchedule
+WITH SCHEMABINDING
+AS
+SELECT 
+    t.Student_ID,
+    t.Section_ID,
+    s.Course_ID,
+    c.Course_name,
+    c.Credits,
+    s.Semester,
+    s.Year,
+    i.Name AS Instructor_name,
+    i.Instructor_ID,
+    ts.Time_slot_ID,
+    ts.Day,
+    ts.Start_time,
+    ts.End_time,
+    s.Building,
+    s.Room_number,
+    t.Grade
+FROM dbo.Takes t
+INNER JOIN dbo.Section s ON t.Section_ID = s.Section_ID
+INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
+LEFT JOIN dbo.Instructor i ON s.Instructor_ID = i.Instructor_ID
+LEFT JOIN dbo.Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID;
+GO
+
+CREATE UNIQUE CLUSTERED INDEX IDX_StudentSchedule 
+ON vw_StudentSchedule(Student_ID, Section_ID);
+GO
+
+CREATE VIEW vw_SectionAvailability
+WITH SCHEMABINDING
+AS
+SELECT 
+    s.Section_ID,
+    s.Course_ID,
+    c.Course_name,
+    c.Credits,
+    c.Dept_name,
+    s.Semester,
+    s.Year,
+    s.Max_enrollment,
+    s.Current_enrollment,
+    (s.Max_enrollment - s.Current_enrollment) AS Available_seats,
+    CASE 
+        WHEN s.Current_enrollment >= s.Max_enrollment THEN 0
+        ELSE 1
+    END AS Is_available,
+    i.Name AS Instructor_name,
+    i.Instructor_ID,
+    ts.Time_slot_ID,
+    ts.Day,
+    ts.Start_time,
+    ts.End_time,
+    s.Building,
+    s.Room_number
+FROM dbo.Section s
+INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
+LEFT JOIN dbo.Instructor i ON s.Instructor_ID = i.Instructor_ID
+LEFT JOIN dbo.Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID;
+GO
+
+CREATE UNIQUE CLUSTERED INDEX IDX_SectionAvailability 
+ON vw_SectionAvailability(Section_ID);
+GO
+
+CREATE VIEW vw_StudentCompletedCourses
+WITH SCHEMABINDING
+AS
+SELECT 
+    t.Student_ID,
+    s.Course_ID,
+    c.Course_name,
+    t.Grade,
+    s.Semester,
+    s.Year
+FROM dbo.Takes t
+INNER JOIN dbo.Section s ON t.Section_ID = s.Section_ID
+INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
+WHERE t.Grade IN ('A', 'A-', 'B+', 'B', 'B-', 'C+', 'C');
+GO
+
+CREATE UNIQUE CLUSTERED INDEX IDX_StudentCompleted 
+ON vw_StudentCompletedCourses(Student_ID, Course_ID);
+GO
+
+PRINT 'Materialized views created!';
+GO
+
 PRINT 'Creating stored procedures...';
 GO
 
@@ -221,34 +405,187 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    DECLARE @MissingCount INT;
-    
-    SELECT @MissingCount = COUNT(*)
-    FROM Prerequisite p
-    WHERE p.Course_ID = @CourseID
-    AND p.Prereq_course_ID NOT IN (
-        SELECT s.Course_ID 
-        FROM Takes t
-        INNER JOIN Section s ON t.Section_ID = s.Section_ID
-        WHERE t.Student_ID = @StudentID
-        AND t.Grade IN ('A', 'A-', 'B+', 'B', 'B-', 'C+', 'C')
-    );
-    
-    IF @MissingCount = 0
-        SET @HasPrerequisites = 1;
-    ELSE
+    BEGIN TRY
+        DECLARE @MissingCount INT;
+        
+        SELECT @MissingCount = COUNT(*)
+        FROM Prerequisite p
+        WHERE p.Course_ID = @CourseID
+        AND p.Prereq_course_ID NOT IN (
+            SELECT Course_ID 
+            FROM vw_StudentCompletedCourses 
+            WHERE Student_ID = @StudentID
+        );
+        
+        IF @MissingCount = 0
+            SET @HasPrerequisites = 1;
+        ELSE
+            SET @HasPrerequisites = 0;
+        
+        SELECT @MissingPrereqs = STRING_AGG(Prereq_course_ID, ', ')
+        FROM Prerequisite
+        WHERE Course_ID = @CourseID
+        AND Prereq_course_ID NOT IN (
+            SELECT Course_ID 
+            FROM vw_StudentCompletedCourses 
+            WHERE Student_ID = @StudentID
+        );
+    END TRY
+    BEGIN CATCH
         SET @HasPrerequisites = 0;
+        SET @MissingPrereqs = 'Error checking prerequisites: ' + ERROR_MESSAGE();
+    END CATCH
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_CheckScheduleConflict
+    @StudentID INT,
+    @SectionID INT,
+    @HasConflict BIT OUTPUT,
+    @ConflictDetails VARCHAR(MAX) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
     
-    SELECT @MissingPrereqs = STRING_AGG(Prereq_course_ID, ', ')
-    FROM Prerequisite
-    WHERE Course_ID = @CourseID
-    AND Prereq_course_ID NOT IN (
-        SELECT s.Course_ID 
-        FROM Takes t
-        INNER JOIN Section s ON t.Section_ID = s.Section_ID
-        WHERE t.Student_ID = @StudentID
-        AND t.Grade IN ('A', 'A-', 'B+', 'B', 'B-', 'C+', 'C')
-    );
+    BEGIN TRY
+        DECLARE @Semester VARCHAR(10);
+        DECLARE @Year INT;
+        DECLARE @TimeSlotID INT;
+        DECLARE @Day VARCHAR(10);
+        DECLARE @StartTime TIME;
+        DECLARE @EndTime TIME;
+        
+        SELECT 
+            @Semester = Semester,
+            @Year = Year,
+            @TimeSlotID = Time_slot_ID
+        FROM Section
+        WHERE Section_ID = @SectionID;
+        
+        IF @TimeSlotID IS NULL
+        BEGIN
+            SET @HasConflict = 0;
+            SET @ConflictDetails = '';
+            RETURN;
+        END
+        
+        SELECT @Day = Day, @StartTime = Start_time, @EndTime = End_time
+        FROM Time_Slot
+        WHERE Time_slot_ID = @TimeSlotID;
+        
+        IF EXISTS (
+            SELECT 1
+            FROM vw_StudentSchedule vs
+            WHERE vs.Student_ID = @StudentID
+            AND vs.Semester = @Semester
+            AND vs.Year = @Year
+            AND vs.Grade IS NULL
+            AND vs.Day = @Day
+            AND vs.Start_time < @EndTime
+            AND vs.End_time > @StartTime
+        )
+        BEGIN
+            SET @HasConflict = 1;
+            SELECT @ConflictDetails = STRING_AGG(Course_name + ' (' + Day + ' ' + 
+                CONVERT(VARCHAR(5), Start_time, 108) + '-' + 
+                CONVERT(VARCHAR(5), End_time, 108) + ')', '; ')
+            FROM vw_StudentSchedule
+            WHERE Student_ID = @StudentID
+            AND Semester = @Semester
+            AND Year = @Year
+            AND Grade IS NULL
+            AND Day = @Day
+            AND Start_time < @EndTime
+            AND End_time > @StartTime;
+        END
+        ELSE
+        BEGIN
+            SET @HasConflict = 0;
+            SET @ConflictDetails = '';
+        END
+    END TRY
+    BEGIN CATCH
+        SET @HasConflict = 1;
+        SET @ConflictDetails = 'Error checking conflicts: ' + ERROR_MESSAGE();
+    END CATCH
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_AddToShoppingCart
+    @StudentID INT,
+    @SectionID INT,
+    @Success BIT OUTPUT,
+    @Message VARCHAR(MAX) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    
+    BEGIN TRANSACTION;
+    
+    BEGIN TRY
+        DECLARE @CourseID VARCHAR(20);
+        DECLARE @HasPrereqs BIT;
+        DECLARE @MissingPrereqs VARCHAR(MAX);
+        DECLARE @HasConflict BIT;
+        DECLARE @ConflictDetails VARCHAR(MAX);
+        
+        SELECT @CourseID = Course_ID FROM Section WHERE Section_ID = @SectionID;
+        
+        IF EXISTS (SELECT 1 FROM Shopping_Cart 
+                   WHERE Student_ID = @StudentID 
+                   AND Section_ID = @SectionID 
+                   AND Status = 'Pending')
+        BEGIN
+            SET @Success = 0;
+            SET @Message = 'Section already in shopping cart.';
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+        
+        IF EXISTS (SELECT 1 FROM Takes 
+                   WHERE Student_ID = @StudentID 
+                   AND Section_ID = @SectionID)
+        BEGIN
+            SET @Success = 0;
+            SET @Message = 'Already enrolled in this section.';
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+        
+        EXEC sp_CheckPrerequisites @StudentID, @CourseID, @HasPrereqs OUTPUT, @MissingPrereqs OUTPUT;
+        
+        IF @HasPrereqs = 0
+        BEGIN
+            SET @Success = 0;
+            SET @Message = 'Missing prerequisites: ' + ISNULL(@MissingPrereqs, '');
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+        
+        EXEC sp_CheckScheduleConflict @StudentID, @SectionID, @HasConflict OUTPUT, @ConflictDetails OUTPUT;
+        
+        IF @HasConflict = 1
+        BEGIN
+            SET @Success = 0;
+            SET @Message = 'Time conflict with: ' + @ConflictDetails;
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
+        
+        INSERT INTO Shopping_Cart (Student_ID, Section_ID, Status)
+        VALUES (@StudentID, @SectionID, 'Pending');
+        
+        SET @Success = 1;
+        SET @Message = 'Added to shopping cart successfully!';
+        
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        SET @Success = 0;
+        SET @Message = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
 END;
 GO
 
@@ -265,15 +602,12 @@ BEGIN
     BEGIN TRANSACTION;
     
     BEGIN TRY
-        DECLARE @CourseID VARCHAR(20);
-        DECLARE @HasPrereqs BIT;
-        DECLARE @MissingPrereqs VARCHAR(MAX);
         DECLARE @CurrentEnroll INT;
         DECLARE @MaxEnroll INT;
         
-        SELECT @CourseID = Course_ID, 
-               @CurrentEnroll = Current_enrollment,
-               @MaxEnroll = Max_enrollment
+        SELECT 
+            @CurrentEnroll = Current_enrollment,
+            @MaxEnroll = Max_enrollment
         FROM Section WHERE Section_ID = @SectionID;
         
         IF EXISTS (SELECT 1 FROM Takes WHERE Student_ID = @StudentID AND Section_ID = @SectionID)
@@ -287,17 +621,7 @@ BEGIN
         IF @CurrentEnroll >= @MaxEnroll
         BEGIN
             SET @Success = 0;
-            SET @Message = 'Section is full.';
-            ROLLBACK TRANSACTION;
-            RETURN;
-        END
-        
-        EXEC sp_CheckPrerequisites @StudentID, @CourseID, @HasPrereqs OUTPUT, @MissingPrereqs OUTPUT;
-        
-        IF @HasPrereqs = 0
-        BEGIN
-            SET @Success = 0;
-            SET @Message = 'Missing prerequisites: ' + ISNULL(@MissingPrereqs, '');
+            SET @Message = 'Section is full. No seats available.';
             ROLLBACK TRANSACTION;
             RETURN;
         END
@@ -309,16 +633,102 @@ BEGIN
         SET Current_enrollment = Current_enrollment + 1
         WHERE Section_ID = @SectionID;
         
+        UPDATE Shopping_Cart
+        SET Status = 'Registered'
+        WHERE Student_ID = @StudentID 
+        AND Section_ID = @SectionID 
+        AND Status = 'Pending';
+        
+        INSERT INTO Registration_Log (Student_ID, Section_ID, Action, Success, Error_message)
+        VALUES (@StudentID, @SectionID, 'REGISTER', 1, NULL);
+        
         SET @Success = 1;
         SET @Message = 'Registration successful!';
         
         COMMIT TRANSACTION;
-        
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
+        
+        INSERT INTO Registration_Log (Student_ID, Section_ID, Action, Success, Error_message)
+        VALUES (@StudentID, @SectionID, 'REGISTER', 0, ERROR_MESSAGE());
+        
+        SET @Success = 0;
+        SET @Message = 'Registration failed: ' + ERROR_MESSAGE();
+    END CATCH
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_RemoveFromCart
+    @StudentID INT,
+    @SectionID INT,
+    @Success BIT OUTPUT,
+    @Message VARCHAR(MAX) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    BEGIN TRY
+        IF NOT EXISTS (SELECT 1 FROM Shopping_Cart 
+                       WHERE Student_ID = @StudentID 
+                       AND Section_ID = @SectionID 
+                       AND Status = 'Pending')
+        BEGIN
+            SET @Success = 0;
+            SET @Message = 'Section not found in shopping cart.';
+            RETURN;
+        END
+        
+        UPDATE Shopping_Cart
+        SET Status = 'Removed'
+        WHERE Student_ID = @StudentID 
+        AND Section_ID = @SectionID 
+        AND Status = 'Pending';
+        
+        SET @Success = 1;
+        SET @Message = 'Removed from cart successfully.';
+    END TRY
+    BEGIN CATCH
         SET @Success = 0;
         SET @Message = 'Error: ' + ERROR_MESSAGE();
+    END CATCH
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_GetShoppingCart
+    @StudentID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    BEGIN TRY
+        SELECT 
+            sc.Cart_ID,
+            sc.Section_ID,
+            s.Course_ID,
+            c.Course_name,
+            c.Credits,
+            s.Semester,
+            s.Year,
+            i.Name AS Instructor_name,
+            ts.Day,
+            ts.Start_time,
+            ts.End_time,
+            s.Building,
+            s.Room_number,
+            (s.Max_enrollment - s.Current_enrollment) AS Available_seats,
+            sc.Date_added
+        FROM Shopping_Cart sc
+        INNER JOIN Section s ON sc.Section_ID = s.Section_ID
+        INNER JOIN Course c ON s.Course_ID = c.Course_ID
+        LEFT JOIN Instructor i ON s.Instructor_ID = i.Instructor_ID
+        LEFT JOIN Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID
+        WHERE sc.Student_ID = @StudentID 
+        AND sc.Status = 'Pending'
+        ORDER BY sc.Date_added;
+    END TRY
+    BEGIN CATCH
+        SELECT ERROR_MESSAGE() AS Error;
     END CATCH
 END;
 GO
@@ -326,14 +736,9 @@ GO
 PRINT 'Stored procedures created!';
 PRINT '========================================';
 PRINT 'SETUP COMPLETE!';
-PRINT 'Database: CollegeDB';
-PRINT 'Tables: 11';
-PRINT 'Sample Students: 5';
-PRINT 'Sample Courses: 7';
-PRINT 'Sample Sections: 6';
 PRINT '========================================';
 
-SELECT 'Departments' AS TableName, COUNT(*) AS RecordCount FROM Department
+SELECT 'Departments' AS Item, COUNT(*) AS Count FROM Department
 UNION ALL
 SELECT 'Instructors', COUNT(*) FROM Instructor
 UNION ALL
@@ -341,19 +746,7 @@ SELECT 'Courses', COUNT(*) FROM Course
 UNION ALL
 SELECT 'Students', COUNT(*) FROM Student
 UNION ALL
-SELECT 'Sections', COUNT(*) FROM Section;
+SELECT 'Sections', COUNT(*) FROM Section
+UNION ALL
+SELECT 'Prerequisites', COUNT(*) FROM Prerequisite;
 GO
-
-
--- USE CollegeDB;
--- GO
-
--- DECLARE @Success BIT, @Msg VARCHAR(MAX);
-
--- EXEC sp_RegisterStudent 
---     @StudentID = 1,
---     @SectionID = 3,
---     @Success = @Success OUTPUT,
---     @Message = @Msg OUTPUT;
-
--- SELECT @Success AS Success, @Msg AS Message;

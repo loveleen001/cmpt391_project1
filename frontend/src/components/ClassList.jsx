@@ -1,73 +1,32 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import CourseCard from './CourseCard';
+
+const API_URL = 'http://localhost:5000/api';
 
 function ClassList({ studentId }) {
   const [enrolledClasses, setEnrolledClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showEnrolled, setShowEnrolled] = useState(true);
 
   useEffect(() => {
-    // Mock data - in Phase 3 we'll fetch from database
-    const mockClasses = {
-      1: [ // Alice's classes
-        {
-          Section_ID: 1,
-          Course_ID: 'CMPT101',
-          Course_name: 'Introduction to Programming',
-          Credits: 3,
-          Instructor: 'Dr. Sarah Johnson',
-          Day: 'Monday',
-          Start_time: '08:00',
-          End_time: '09:30',
-          Building: 'Building A',
-          Room_number: '101',
-          Grade: 'A'
-        },
-        {
-          Section_ID: 2,
-          Course_ID: 'CMPT102',
-          Course_name: 'Data Structures',
-          Credits: 3,
-          Instructor: 'Prof. Michael Chen',
-          Day: 'Monday',
-          Start_time: '10:00',
-          End_time: '11:30',
-          Building: 'Building A',
-          Room_number: '102',
-          Grade: 'B+'
-        },
-        {
-          Section_ID: 3,
-          Course_ID: 'CMPT201',
-          Course_name: 'Algorithms',
-          Credits: 3,
-          Instructor: 'Dr. Sarah Johnson',
-          Day: 'Monday',
-          Start_time: '12:00',
-          End_time: '13:30',
-          Building: 'Building A',
-          Room_number: '101',
-          Grade: null // Currently enrolled
-        }
-      ],
-      2: [ // Bob's classes
-        {
-          Section_ID: 1,
-          Course_ID: 'CMPT101',
-          Course_name: 'Introduction to Programming',
-          Credits: 3,
-          Instructor: 'Dr. Sarah Johnson',
-          Day: 'Monday',
-          Start_time: '08:00',
-          End_time: '09:30',
-          Building: 'Building A',
-          Room_number: '101',
-          Grade: 'B'
-        }
-      ]
-    };
-
-    setEnrolledClasses(mockClasses[studentId] || []);
+    fetchSchedule();
   }, [studentId]);
+
+  const fetchSchedule = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/student/${studentId}/schedule`);
+      setEnrolledClasses(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching schedule:', err);
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="class-list"><p>Loading schedule...</p></div>;
+  }
 
   const currentClasses = enrolledClasses.filter(c => c.Grade === null);
   const completedClasses = enrolledClasses.filter(c => c.Grade !== null);
@@ -85,17 +44,27 @@ function ClassList({ studentId }) {
         </label>
       </div>
 
-      <div className="classes-container">
-        <h3>Currently Enrolled ({currentClasses.length})</h3>
-        {currentClasses.map(course => (
-          <CourseCard key={course.Section_ID} course={course} status="Enrolled" />
-        ))}
+      {showEnrolled && (
+        <div className="classes-container">
+          <h3>Currently Enrolled ({currentClasses.length})</h3>
+          {currentClasses.length === 0 ? (
+            <p className="no-classes">No current enrollments</p>
+          ) : (
+            currentClasses.map(course => (
+              <CourseCard key={course.Section_ID} course={course} status="Enrolled" />
+            ))
+          )}
 
-        <h3 style={{marginTop: '30px'}}>Completed Courses ({completedClasses.length})</h3>
-        {completedClasses.map(course => (
-          <CourseCard key={course.Section_ID} course={course} status="Completed" />
-        ))}
-      </div>
+          <h3 style={{marginTop: '30px'}}>Completed Courses ({completedClasses.length})</h3>
+          {completedClasses.length === 0 ? (
+            <p className="no-classes">No completed courses</p>
+          ) : (
+            completedClasses.map(course => (
+              <CourseCard key={course.Section_ID} course={course} status="Completed" />
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
