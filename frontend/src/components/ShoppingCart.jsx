@@ -11,17 +11,17 @@ function ShoppingCart({ studentId, semester, year, onRegisterSuccess }) {
   const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
-  fetchCart();
+    fetchCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studentId, semester, year]);
-
 
   const fetchCart = async () => {
     try {
-      const response = await axios.get(
-        `${API_URL}/cart/${studentId}`,
-        { params: { semester, year } }
-      );
-
+      const response = await axios.get(`${API_URL}/cart/${studentId}`, {
+        params: { semester, year }
+      });
+      
+      // DON'T FILTER - just show everything
       setCartItems(response.data);
       setLoading(false);
     } catch (err) {
@@ -33,11 +33,9 @@ function ShoppingCart({ studentId, semester, year, onRegisterSuccess }) {
   const handleAddToCart = async (section) => {
     try {
       const response = await axios.post(`${API_URL}/cart/add`, {
-      studentId,
-      sectionId: section.Section_ID,
-      semester,
-      year
-    });
+        studentId,
+        sectionId: section.Section_ID
+      });
 
       if (response.data.success) {
         alert(response.data.message);
@@ -54,12 +52,9 @@ function ShoppingCart({ studentId, semester, year, onRegisterSuccess }) {
   const handleRemoveFromCart = async (sectionId) => {
     try {
       const response = await axios.post(`${API_URL}/cart/remove`, {
-      studentId,
-      sectionId,
-      semester,
-      year
-    });
-
+        studentId,
+        sectionId
+      });
 
       if (response.data.success) {
         fetchCart();
@@ -87,11 +82,8 @@ function ShoppingCart({ studentId, semester, year, onRegisterSuccess }) {
       const sectionIds = cartItems.map(item => item.Section_ID);
       const response = await axios.post(`${API_URL}/register-all`, {
         studentId,
-        sectionIds,
-        semester,
-        year
+        sectionIds
       });
-
 
       const { successCount, failureCount, results } = response.data;
 
@@ -121,7 +113,6 @@ function ShoppingCart({ studentId, semester, year, onRegisterSuccess }) {
   const formatTime = (timeString) => {
     if (!timeString) return 'TBA';
     
-    // timeString is now "HH:MM" format from backend
     const [hours, minutes] = timeString.split(':').map(Number);
     
     if (hours === 0) return 'TBA';
@@ -153,6 +144,7 @@ function ShoppingCart({ studentId, semester, year, onRegisterSuccess }) {
               <div key={item.Cart_ID} className="cart-item">
                 <div>
                   <h4>{item.Course_ID} - {item.Course_name}</h4>
+                  <p><strong>Section:</strong> {item.Section_ID} | <strong>Term:</strong> {item.Semester} {item.Year}</p>
                   <p>{item.Instructor_name || 'TBA'} | {item.Day || 'TBA'} {formatTime(item.Start_time)}-{formatTime(item.End_time)}</p>
                   <p>Room: {item.Building}-{item.Room_number} | {item.Available_seats} seats available</p>
                 </div>

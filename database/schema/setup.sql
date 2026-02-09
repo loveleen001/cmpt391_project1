@@ -861,4 +861,3 @@ PRINT 'Multiple semesters available: Winter 2026, Spring 2026, Fall 2026';
 PRINT '15 credit limit enforced per term';
 GO
 
-

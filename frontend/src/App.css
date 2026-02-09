@@ -203,7 +203,7 @@ body {
 }
 
 .course-header {
-  background-color: #935d5d;
+  background-color: #173e88;
   color: white;
   padding: 15px;
   cursor: pointer;
@@ -214,7 +214,7 @@ body {
 }
 
 .course-header:hover {
-  background-color: #e38d8d;
+  background-color: #5ebcef;
 }
 
 .course-header h3 {

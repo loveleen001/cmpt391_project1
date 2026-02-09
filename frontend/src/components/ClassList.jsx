@@ -11,6 +11,7 @@ function ClassList({ studentId, semester, year }) {
 
   useEffect(() => {
     fetchSchedule();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studentId, semester, year]);
 
   const fetchSchedule = async () => {

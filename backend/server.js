@@ -138,9 +138,10 @@ app.get('/api/student/:id/schedule', async (req, res) => {
 app.get('/api/cart/:studentId', async (req, res) => {
     try {
         const { semester, year } = req.query;
-        
         const result = await pool.request()
             .input('StudentID', sql.Int, req.params.studentId)
+            .input('Semester', sql.VarChar, semester || 'Winter')
+            .input('Year', sql.Int, parseInt(year) || 2026)
             .query(`
                 SELECT 
                     sc.Cart_ID,
@@ -319,3 +320,4 @@ app.listen(PORT, () => {
     console.log(`📊 Database: ${config.database}`);
     console.log(`💻 Server: ${config.server}`);
 });
+
