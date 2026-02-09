@@ -52,27 +52,6 @@ app.get('/api/students', async (req, res) => {
     }
 });
 
-app.get('/api/student/:id/schedule', async (req, res) => {
-    try {
-        const result = await pool.request()
-            .input('StudentID', sql.Int, req.params.id)
-            .query(`
-                SELECT * FROM vw_StudentSchedule 
-                WHERE Student_ID = @StudentID
-                ORDER BY 
-                    CASE 
-                        WHEN Grade IS NULL THEN 0 
-                        ELSE 1 
-                    END,
-                    Course_ID
-            `);
-        res.json(result.recordset);
-    } catch (err) {
-        console.error('Error fetching schedule:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
 app.get('/api/sections/available', async (req, res) => {
     try {
         const { semester = 'Winter', year = 2026, search = '' } = req.query;
@@ -82,7 +61,27 @@ app.get('/api/sections/available', async (req, res) => {
             .input('Year', sql.Int, parseInt(year))
             .input('Search', sql.VarChar, `%${search}%`)
             .query(`
-                SELECT * FROM vw_SectionAvailability
+                SELECT 
+                    Section_ID,
+                    Course_ID,
+                    Course_name,
+                    Credits,
+                    Dept_name,
+                    Semester,
+                    Year,
+                    Max_enrollment,
+                    Current_enrollment,
+                    Available_seats,
+                    Is_available,
+                    Instructor_name,
+                    Instructor_ID,
+                    Time_slot_ID,
+                    Day,
+                    CONVERT(VARCHAR(5), Start_time, 108) AS Start_time,  -- Fixed format
+                    CONVERT(VARCHAR(5), End_time, 108) AS End_time,      -- Fixed format
+                    Building,
+                    Room_number
+                FROM vw_SectionAvailability
                 WHERE Semester = @Semester 
                 AND Year = @Year
                 AND Is_available = 1
@@ -96,11 +95,80 @@ app.get('/api/sections/available', async (req, res) => {
     }
 });
 
+app.get('/api/student/:id/schedule', async (req, res) => {
+  try {
+    const { semester, year } = req.query;
+
+    const result = await pool.request()
+      .input('StudentID', sql.Int, req.params.id)
+      .input('Semester', sql.VarChar, semester)
+      .input('Year', sql.Int, parseInt(year))
+      .query(`
+        SELECT 
+            Student_ID,
+            Section_ID,
+            Course_ID,
+            Course_name,
+            Credits,
+            Semester,
+            Year,
+            Instructor_name,
+            Instructor_ID,
+            Time_slot_ID,
+            Day,
+            CONVERT(VARCHAR(5), Start_time, 108) AS Start_time,
+            CONVERT(VARCHAR(5), End_time, 108) AS End_time,
+            Building,
+            Room_number,
+            Grade
+        FROM vw_StudentSchedule 
+        WHERE Student_ID = @StudentID
+          AND Semester = @Semester
+          AND Year = @Year
+        ORDER BY Course_ID
+      `);
+
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 app.get('/api/cart/:studentId', async (req, res) => {
     try {
+        const { semester, year } = req.query;
+        
         const result = await pool.request()
             .input('StudentID', sql.Int, req.params.studentId)
-            .execute('sp_GetShoppingCart');
+            .query(`
+                SELECT 
+                    sc.Cart_ID,
+                    sc.Section_ID,
+                    s.Course_ID,
+                    c.Course_name,
+                    c.Credits,
+                    s.Semester,
+                    s.Year,
+                    i.Name AS Instructor_name,
+                    ts.Day,
+                    CONVERT(VARCHAR(5), ts.Start_time, 108) AS Start_time,  -- Fixed format
+                    CONVERT(VARCHAR(5), ts.End_time, 108) AS End_time,      -- Fixed format
+                    s.Building,
+                    s.Room_number,
+                    (s.Max_enrollment - s.Current_enrollment) AS Available_seats,
+                    sc.Date_added
+                FROM Shopping_Cart sc
+                INNER JOIN Section s ON sc.Section_ID = s.Section_ID
+                INNER JOIN Course c ON s.Course_ID = c.Course_ID
+                LEFT JOIN Instructor i ON s.Instructor_ID = i.Instructor_ID
+                LEFT JOIN Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID
+                WHERE sc.Student_ID = @StudentID 
+                AND s.Semester = @Semester
+                AND s.Year = @Year
+                AND sc.Status = 'Pending'
+                ORDER BY sc.Date_added
+            `);
         
         res.json(result.recordset);
     } catch (err) {

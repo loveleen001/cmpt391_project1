@@ -4,18 +4,21 @@ import CourseCard from './CourseCard';
 
 const API_URL = 'http://localhost:5000/api';
 
-function ClassList({ studentId }) {
+function ClassList({ studentId, semester, year }) {
   const [enrolledClasses, setEnrolledClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEnrolled, setShowEnrolled] = useState(true);
 
   useEffect(() => {
     fetchSchedule();
-  }, [studentId]);
+  }, [studentId, semester, year]);
 
   const fetchSchedule = async () => {
     try {
-      const response = await axios.get(`${API_URL}/student/${studentId}/schedule`);
+      const response = await axios.get(
+        `${API_URL}/student/${studentId}/schedule`,
+        { params: { semester, year } }
+      );
       setEnrolledClasses(response.data);
       setLoading(false);
     } catch (err) {
@@ -55,7 +58,9 @@ function ClassList({ studentId }) {
             ))
           )}
 
-          <h3 style={{marginTop: '30px'}}>Completed Courses ({completedClasses.length})</h3>
+          <h3 style={{ marginTop: '30px' }}>
+            Completed Courses ({completedClasses.length})
+          </h3>
           {completedClasses.length === 0 ? (
             <p className="no-classes">No completed courses</p>
           ) : (

@@ -4,19 +4,24 @@ import AddCourseModal from './AddCourseModal';
 
 const API_URL = 'http://localhost:5000/api';
 
-function ShoppingCart({ studentId, onRegisterSuccess }) {
+function ShoppingCart({ studentId, semester, year, onRegisterSuccess }) {
   const [cartItems, setCartItems] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
-    fetchCart();
-  }, [studentId]);
+  fetchCart();
+  }, [studentId, semester, year]);
+
 
   const fetchCart = async () => {
     try {
-      const response = await axios.get(`${API_URL}/cart/${studentId}`);
+      const response = await axios.get(
+        `${API_URL}/cart/${studentId}`,
+        { params: { semester, year } }
+      );
+
       setCartItems(response.data);
       setLoading(false);
     } catch (err) {
@@ -28,9 +33,11 @@ function ShoppingCart({ studentId, onRegisterSuccess }) {
   const handleAddToCart = async (section) => {
     try {
       const response = await axios.post(`${API_URL}/cart/add`, {
-        studentId,
-        sectionId: section.Section_ID
-      });
+      studentId,
+      sectionId: section.Section_ID,
+      semester,
+      year
+    });
 
       if (response.data.success) {
         alert(response.data.message);
@@ -47,9 +54,12 @@ function ShoppingCart({ studentId, onRegisterSuccess }) {
   const handleRemoveFromCart = async (sectionId) => {
     try {
       const response = await axios.post(`${API_URL}/cart/remove`, {
-        studentId,
-        sectionId
-      });
+      studentId,
+      sectionId,
+      semester,
+      year
+    });
+
 
       if (response.data.success) {
         fetchCart();
@@ -77,8 +87,11 @@ function ShoppingCart({ studentId, onRegisterSuccess }) {
       const sectionIds = cartItems.map(item => item.Section_ID);
       const response = await axios.post(`${API_URL}/register-all`, {
         studentId,
-        sectionIds
+        sectionIds,
+        semester,
+        year
       });
+
 
       const { successCount, failureCount, results } = response.data;
 
@@ -106,8 +119,17 @@ function ShoppingCart({ studentId, onRegisterSuccess }) {
   };
 
   const formatTime = (timeString) => {
-    if (!timeString) return '';
-    return timeString.substring(0, 5);
+    if (!timeString) return 'TBA';
+    
+    // timeString is now "HH:MM" format from backend
+    const [hours, minutes] = timeString.split(':').map(Number);
+    
+    if (hours === 0) return 'TBA';
+    
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+    
+    return `${displayHours}:${minutes.toString().padStart(2, '0')}${period}`;
   };
 
   if (loading) {
@@ -157,6 +179,8 @@ function ShoppingCart({ studentId, onRegisterSuccess }) {
       {showAddModal && (
         <AddCourseModal 
           studentId={studentId}
+          semester={semester}
+          year={year}
           onAdd={handleAddToCart}
           onClose={() => setShowAddModal(false)}
         />

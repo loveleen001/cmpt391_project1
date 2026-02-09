@@ -3,17 +3,17 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api';
 
-function AddCourseModal({ studentId, onAdd, onClose }) {
+function AddCourseModal({ studentId, semester, year, onAdd, onClose }) {
   const [availableSections, setAvailableSections] = useState([]);
   const [prerequisites, setPrerequisites] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [semester] = useState('Winter');
-  const [year] = useState(2026);
+  // REMOVED: const [semester] = useState('Winter');
+  // REMOVED: const [year] = useState(2026);
 
   useEffect(() => {
     fetchSections();
-  }, [searchTerm]);
+  }, [searchTerm, semester, year]); // Added dependencies
 
   const fetchSections = async () => {
     try {
@@ -47,20 +47,15 @@ function AddCourseModal({ studentId, onAdd, onClose }) {
   const formatTime = (timeString) => {
     if (!timeString) return 'TBA';
     
-    if (timeString.includes(':')) {
-      const parts = timeString.split(':');
-      const hours = parseInt(parts[0]);
-      const minutes = parts[1];
-      
-      if (hours === 0) return 'TBA';
-      
-      const period = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
-      
-      return `${displayHours}:${minutes}${period}`;
-    }
+    // timeString is now "HH:MM" format from backend
+    const [hours, minutes] = timeString.split(':').map(Number);
     
-    return timeString;
+    if (hours === 0) return 'TBA';
+    
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+    
+    return `${displayHours}:${minutes.toString().padStart(2, '0')}${period}`;
   };
 
   return (
@@ -91,7 +86,7 @@ function AddCourseModal({ studentId, onAdd, onClose }) {
                   <div>
                     <h4>{section.Course_ID} - {section.Course_name}</h4>
                     
-                    {/* NEW: Show Prerequisites */}
+                    {/* Show Prerequisites */}
                     {prerequisites[section.Course_ID] && prerequisites[section.Course_ID].length > 0 && (
                       <p className="prerequisites-info">
                         <strong>Prerequisites:</strong> {prerequisites[section.Course_ID].map(p => p.Prereq_course_ID).join(', ')}

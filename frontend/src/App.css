@@ -583,3 +583,35 @@ body {
   border-left: 3px solid #8B0000;
   border-radius: 3px;
 }
+
+.term-selector {
+  background-color: white;
+  padding: 15px 20px;
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.term-select {
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 2px solid #8B0000;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.term-select:focus {
+  outline: none;
+  border-color: #660000;
+}
+
+.term-tag {
+  font-size: 0.85em;
+  color: #666;
+  margin-left: 8px;
+}

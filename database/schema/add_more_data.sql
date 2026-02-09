@@ -130,3 +130,25 @@ SELECT 'Sections', COUNT(*) FROM Section
 UNION ALL
 SELECT 'Students', COUNT(*) FROM Student;
 GO
+
+USE CollegeDB;
+GO
+
+-- Add Spring 2026 sections
+INSERT INTO Section (Course_ID, Semester, Year, Instructor_ID, Time_slot_ID, Building, Room_number, Max_enrollment, Current_enrollment) VALUES 
+    ('CMPT101', 'Spring', 2026, 1, 1, 'Building A', '101', 30, 0),
+    ('CMPT102', 'Spring', 2026, 2, 2, 'Building A', '102', 30, 0),
+    ('CMPT201', 'Spring', 2026, 1, 3, 'Building A', '101', 30, 0),
+    ('MATH101', 'Spring', 2026, 4, 5, 'Building B', '101', 30, 0),
+    ('BUS101', 'Spring', 2026, 6, 6, 'Building C', '101', 45, 0);
+
+-- Add Fall 2026 sections
+INSERT INTO Section (Course_ID, Semester, Year, Instructor_ID, Time_slot_ID, Building, Room_number, Max_enrollment, Current_enrollment) VALUES 
+    ('CMPT301', 'Fall', 2026, 3, 4, 'Building A', '102', 30, 0),
+    ('CMPT302', 'Fall', 2026, 2, 7, 'Building A', '201', 30, 0),
+    ('MATH102', 'Fall', 2026, 4, 14, 'Building B', '101', 30, 0),
+    ('BUS201', 'Fall', 2026, 6, 18, 'Building C', '201', 40, 0);
+
+PRINT 'Additional semester sections added!';
+GO
+

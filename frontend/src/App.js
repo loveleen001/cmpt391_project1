@@ -8,10 +8,17 @@ function App() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [activeTab, setActiveTab] = useState('enrolled');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedTerm, setSelectedTerm] = useState({ semester: 'Winter', year: 2026 });
 
   const handleRefresh = () => {
     setRefreshKey(prev => prev + 1);
   };
+
+  // Available terms (current and future only)
+  const availableTerms = [
+    { semester: 'Winter', year: 2026, label: '2026 Winter' },
+    { semester: 'Spring', year: 2026, label: '2026 Spring/Summer' }
+  ];
 
   return (
     <div className="App">
@@ -20,7 +27,7 @@ function App() {
       </header>
 
       <div className="term-info">
-        <h2>2026 Winter Term</h2>
+        <h2>{selectedTerm.year} {selectedTerm.semester} Term</h2>
         <p>Undergraduate</p>
       </div>
 
@@ -28,6 +35,29 @@ function App() {
         <StudentLogin onSelectStudent={setSelectedStudent} />
       ) : (
         <div className="main-content">
+          {/* NEW: Term Selector */}
+          <div className="term-selector">
+            <label><strong>Select Term:</strong></label>
+            <select 
+              value={`${selectedTerm.semester}-${selectedTerm.year}`}
+              onChange={(e) => {
+                const [semester, year] = e.target.value.split('-');
+                setSelectedTerm({ semester, year: parseInt(year) });
+                setRefreshKey(prev => prev + 1);
+              }}
+              className="term-select"
+            >
+              {availableTerms.map(term => (
+                <option 
+                  key={`${term.semester}-${term.year}`} 
+                  value={`${term.semester}-${term.year}`}
+                >
+                  {term.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="navigation-tabs">
             <button 
               className={activeTab === 'enrolled' ? 'active' : ''}
@@ -57,13 +87,17 @@ function App() {
 
           {activeTab === 'enrolled' ? (
             <ClassList 
-              key={`enrolled-${refreshKey}`}
-              studentId={selectedStudent.Student_ID} 
+              key={`enrolled-${selectedTerm.semester}-${selectedTerm.year}-${refreshKey}`}
+              studentId={selectedStudent.Student_ID}
+              semester={selectedTerm.semester}
+              year={selectedTerm.year}
             />
           ) : (
             <ShoppingCart 
-              key={`cart-${refreshKey}`}
+              key={`cart-${selectedTerm.semester}-${selectedTerm.year}-${refreshKey}`}
               studentId={selectedStudent.Student_ID}
+              semester={selectedTerm.semester}
+              year={selectedTerm.year}
               onRegisterSuccess={handleRefresh}
             />
           )}

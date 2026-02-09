@@ -12,7 +12,12 @@ function CourseCard({ course, status }) {
     <div className="course-card">
       <div className="course-header" onClick={() => setExpanded(!expanded)}>
         <span className="expand-icon">{expanded ? '▼' : '▶'}</span>
-        <h3>{course.Course_ID} {course.Course_name}</h3>
+        <h3>
+          {course.Course_ID} {course.Course_name}
+          <span className="term-tag">
+            ({course.Semester} {course.Year} · Section {course.Section_ID})
+          </span>
+        </h3>
       </div>
 
       {expanded && (
