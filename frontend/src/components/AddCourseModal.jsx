@@ -1,20 +1,29 @@
+// Import React and React Hooks.
 import React, { useState, useEffect } from 'react';
+// Import axios Which is Used to Make HTTP Requests to the Backend API.
 import axios from 'axios';
 
+// Setting URL for Backend API
 const API_URL = 'http://localhost:5000/api';
 
+// Add Course Function
+// Requires studentId, semester, year, onAdd and onClose as Input.
 function AddCourseModal({ studentId, semester, year, onAdd, onClose }) {
+  // Stores List of Available Courses
   const [availableSections, setAvailableSections] = useState([]);
+  // Stores List of Course Prequesistes
   const [prerequisites, setPrerequisites] = useState({});
+  // Tracks If Data is Loading.
   const [loading, setLoading] = useState(true);
+  // Stores The Users Seach Input.
   const [searchTerm, setSearchTerm] = useState('');
-  // REMOVED: const [semester] = useState('Winter');
-  // REMOVED: const [year] = useState(2026);
 
+  // Runs When searchTerm, semester or year Changes, To Update Page Results.
   useEffect(() => {
     fetchSections();
   }, [searchTerm, semester, year]); // Added dependencies
 
+  // Grab Sections That Are Available from The Backend.
   const fetchSections = async () => {
     try {
       const response = await axios.get(`${API_URL}/sections/available`, {
@@ -22,28 +31,35 @@ function AddCourseModal({ studentId, semester, year, onAdd, onClose }) {
       });
       setAvailableSections(response.data);
       
-      // Fetch prerequisites for each unique course
+      // Fetch prerequisites for each unique course.
       const uniqueCourses = [...new Set(response.data.map(s => s.Course_ID))];
+      // Create Request To Fetch Prerequisites for Each Course.
       const prereqPromises = uniqueCourses.map(courseId => 
         axios.get(`${API_URL}/course/${courseId}/prerequisites`)
           .then(res => ({ courseId, prereqs: res.data }))
           .catch(() => ({ courseId, prereqs: [] }))
       );
       
+      // Wait For All Prequesite Requests.
       const prereqResults = await Promise.all(prereqPromises);
+      // Convert Results Into an Object Map.
       const prereqMap = {};
       prereqResults.forEach(({ courseId, prereqs }) => {
         prereqMap[courseId] = prereqs;
       });
       
+      // Save Prerequisites Map to State
       setPrerequisites(prereqMap);
+      // Stop Loading Once All is Fetched.
       setLoading(false);
+    // In The Case of an Error run console.error and Stop Loading.
     } catch (err) {
       console.error('Error fetching sections:', err);
       setLoading(false);
     }
   };
 
+  // Converts 24 Hour Time Format to 12 Hour Time Format.
   const formatTime = (timeString) => {
     if (!timeString) return 'TBA';
     
@@ -55,9 +71,11 @@ function AddCourseModal({ studentId, semester, year, onAdd, onClose }) {
     const period = hours >= 12 ? 'PM' : 'AM';
     const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
     
+    // Return Reformated Time.
     return `${displayHours}:${minutes.toString().padStart(2, '0')}${period}`;
   };
 
+  // JSX Returned.
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -116,4 +134,5 @@ function AddCourseModal({ studentId, semester, year, onAdd, onClose }) {
   );
 }
 
+// Exporting The Component So it Can Be Used In Other Files.
 export default AddCourseModal;
