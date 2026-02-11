@@ -35,7 +35,7 @@ function App() {
         <StudentLogin onSelectStudent={setSelectedStudent} />
       ) : (
         <div className="main-content">
-          {/* NEW: Term Selector */}
+          {/* Term Selector */}
           <div className="term-selector">
             <label><strong>Select Term:</strong></label>
             <select 
@@ -63,13 +63,13 @@ function App() {
               className={activeTab === 'enrolled' ? 'active' : ''}
               onClick={() => setActiveTab('enrolled')}
             >
-              📅 View My Classes/Schedule
+              View My Classes/Schedule
             </button>
             <button 
               className={activeTab === 'cart' ? 'active' : ''}
               onClick={() => setActiveTab('cart')}
             >
-              🛒 Shopping Cart
+              Shopping Cart
             </button>
           </div>
 
