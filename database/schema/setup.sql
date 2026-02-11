@@ -860,3 +860,21 @@ SELECT 'Prerequisites', COUNT(*) FROM Prerequisite;
 -- SELECT *
 -- FROM Registration_Log
 -- ORDER BY Action_date DESC;
+
+
+-- little bit of design justification here 
+-- transactions for rollback if anything fails so no half baked changes are pushed
+-- validation rules exist ofc like credit count, end time > start time etc
+-- mviews for saved queries that run fresh everytime we have for student scehdulel and commpleted courses
+-- sp's we have for shopping cart and register and some validation rules like check prereqs or sched conflict 
+
+-- all queries are serializable or transactions 
+
+-- app works by user clicking register sending post request to backend api/register 
+-- sql recieves request and calls sp 
+--      where then sql starts serialiable transaction
+--      does validation
+--      then inserts /updates or rollback
+-- backend gets the response then sends that messge back to the frontend 
+
+-- this maintains security 

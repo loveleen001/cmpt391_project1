@@ -106,8 +106,8 @@ function ShoppingCart({ studentId, semester, year, onRegisterSuccess }) {
 
       // Setting Up Summary Message.
       let message = `Registration complete!\n`;
-      message += `✅ Success: ${successCount}\n`;
-      message += `❌ Failed: ${failureCount}\n\n`;
+      message += `Success: ${successCount}\n`;
+      message += `Failed: ${failureCount}\n\n`;
 
       // Give Details on Failed Attempts if There are Any.
       if (failureCount > 0) {

@@ -1,3 +1,7 @@
+//need this file cause sql cant directly work with the front end
+// get requests retrieve data from mssql
+// post requests create or modify data from mssql
+
 // Importing Modules.
 const express = require('express');
 const cors = require('cors');
@@ -30,8 +34,8 @@ async function connectDB() {
     try {
         // Attempt To Connect To The Database, If Sucessful log Sucess Message.
         pool = await sql.connect(config);
-        console.log('✅ Connected to SQL Server - CollegeDB');
-        console.log(`📊 User: ${config.user}`);
+        console.log('Connected to SQL Server - CollegeDB');
+        console.log(`User: ${config.user}`);
     } catch (err) {
         // In The Case of An Error With sql.connect(), log Error Message and Exit Process.
         console.error('❌ Database connection failed:', err.message);
@@ -372,11 +376,11 @@ async function startServer() {
     // THEN start the server
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
-        console.log(`🚀 Server running on http://localhost:${PORT}`);
-        console.log(`📊 Database: ${config.database}`);
-        console.log(`💻 Server: ${config.server}`);
+        console.log(`Server running on http://localhost:${PORT}`);
+        console.log(`Database: ${config.database}`);
+        console.log(`Server: ${config.server}`);
     });
 }
 
 // Run the startup function
-startServer();
+startServer(); 
