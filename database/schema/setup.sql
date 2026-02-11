@@ -7,6 +7,9 @@ BEGIN
 END
 GO
 
+USE master;
+GO
+
 IF EXISTS (SELECT name FROM sys.databases WHERE name = 'CollegeDB')
 BEGIN
     ALTER DATABASE CollegeDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
@@ -25,6 +28,10 @@ BEGIN
     CREATE USER collegeapp FOR LOGIN collegeapp;
     ALTER ROLE db_owner ADD MEMBER collegeapp;
 END
+GO
+
+
+USE CollegeDB;
 GO
 
 PRINT 'Creating tables...';
@@ -238,9 +245,9 @@ INSERT INTO Course (Course_ID, Course_name, Credits, Dept_name) VALUES
     ('ENGL101', 'English Composition', 3, 'English'),
     ('ENGL201', 'World Literature', 3, 'English'),
     ('ENGL301', 'Advanced Writing', 3, 'English'),
-    ('BIOL101', 'General Biology', 3, 'Biology'),
-    ('BIOL201', 'Cell Biology', 3, 'Biology'),
-    ('BIOL301', 'Genetics', 3, 'Biology'),
+    ('BIOL101', 'General Biology', 4, 'Biology'),
+    ('BIOL201', 'Cell Biology', 4, 'Biology'),
+    ('BIOL301', 'Genetics', 4, 'Biology'),
     ('PSYC101', 'Introduction to Psychology', 3, 'Psychology'),
     ('PSYC201', 'Developmental Psychology', 3, 'Psychology'),
     ('PSYC301', 'Cognitive Psychology', 3, 'Psychology');
@@ -277,18 +284,10 @@ INSERT INTO Student (Name, Total_cred, Dept_name, Instructor_ID) VALUES
     ('Ian Rodriguez', 15, 'Mathematics', 5),
     ('Julia Kim', 90, 'Business', 6);
 
-DECLARE @i INT = 11;
-WHILE @i <= 40
-BEGIN
-    INSERT INTO Student (Name, Total_cred, Dept_name, Instructor_ID) 
-    VALUES ('Test Student ' + CAST(@i AS VARCHAR), 0, 'Computer Science', 1);
-    SET @i = @i + 1;
-END
-
 INSERT INTO Section (Course_ID, Semester, Year, Instructor_ID, Time_slot_ID, Building, Room_number, Max_enrollment, Current_enrollment) VALUES 
-    ('CMPT101', 'Winter', 2026, 1, 1, 'Building A', '101', 30, 0),
+    ('CMPT101', 'Winter', 2026, 1, 1, 'Building A', '101', 30, 3),
     ('CMPT101', 'Winter', 2026, 2, 5, 'Building A', '102', 30, 0),
-    ('CMPT102', 'Winter', 2026, 2, 2, 'Building A', '102', 30, 0),
+    ('CMPT102', 'Winter', 2026, 2, 2, 'Building A', '102', 30, 3),
     ('CMPT102', 'Winter', 2026, 3, 6, 'Building A', '201', 35, 0),
     ('CMPT201', 'Winter', 2026, 1, 3, 'Building A', '101', 30, 0),
     ('CMPT301', 'Winter', 2026, 3, 4, 'Building A', '102', 30, 0),
@@ -309,16 +308,7 @@ INSERT INTO Section (Course_ID, Semester, Year, Instructor_ID, Time_slot_ID, Bui
     ('BIOL101', 'Winter', 2026, 9, 2, 'Building E', '101', 35, 0),
     ('BIOL201', 'Winter', 2026, 10, 7, 'Building E', '101', 35, 0),
     ('PSYC101', 'Winter', 2026, 11, 3, 'Building F', '101', 30, 0),
-    ('PSYC201', 'Winter', 2026, 12, 8, 'Building F', '101', 30, 0),
-    ('CMPT101', 'Spring', 2026, 1, 1, 'Building A', '101', 30, 0),
-    ('CMPT102', 'Spring', 2026, 2, 2, 'Building A', '102', 30, 0),
-    ('CMPT201', 'Spring', 2026, 1, 3, 'Building A', '101', 30, 0),
-    ('MATH101', 'Spring', 2026, 4, 5, 'Building B', '101', 30, 0),
-    ('BUS101', 'Spring', 2026, 6, 6, 'Building C', '101', 45, 0),
-    ('CMPT301', 'Fall', 2026, 3, 4, 'Building A', '102', 30, 0),
-    ('CMPT302', 'Fall', 2026, 2, 7, 'Building A', '201', 30, 0),
-    ('MATH102', 'Fall', 2026, 4, 14, 'Building B', '101', 30, 0),
-    ('BUS201', 'Fall', 2026, 6, 18, 'Building C', '201', 40, 0);
+    ('PSYC201', 'Winter', 2026, 12, 8, 'Building F', '101', 30, 0);
 
 INSERT INTO Takes (Student_ID, Section_ID, Grade) VALUES 
     (1, 1, 'A'),
@@ -327,26 +317,16 @@ INSERT INTO Takes (Student_ID, Section_ID, Grade) VALUES
     (3, 1, 'A'),
     (3, 3, 'A-');
 
-DECLARE @j INT = 11;
-WHILE @j <= 30
-BEGIN
-    INSERT INTO Takes (Student_ID, Section_ID, Grade)
-    VALUES (@j, 1, NULL);
-    SET @j = @j + 1;
-END
-
-UPDATE Section SET Current_enrollment = 30 WHERE Section_ID = 1;
-
 PRINT 'Sample data loaded!';
 GO
 
 PRINT 'Creating materialized views...';
 GO
 
-CREATE VIEW vw_StudentSchedule
+CREATE VIEW dbo.vw_StudentSchedule
 WITH SCHEMABINDING
 AS
-SELECT 
+SELECT
     t.Student_ID,
     t.Section_ID,
     s.Course_ID,
@@ -363,15 +343,15 @@ SELECT
     s.Building,
     s.Room_number,
     t.Grade
-FROM dbo.Takes t
-INNER JOIN dbo.Section s ON t.Section_ID = s.Section_ID
-INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
-LEFT JOIN dbo.Instructor i ON s.Instructor_ID = i.Instructor_ID
-LEFT JOIN dbo.Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID;
+FROM dbo.Takes      AS t
+JOIN dbo.Section    AS s  ON t.Section_ID = s.Section_ID
+JOIN dbo.Course     AS c  ON s.Course_ID  = c.Course_ID
+JOIN dbo.Instructor AS i  ON s.Instructor_ID = i.Instructor_ID
+JOIN dbo.Time_Slot  AS ts ON s.Time_slot_ID  = ts.Time_slot_ID;
 GO
 
-CREATE UNIQUE CLUSTERED INDEX IDX_StudentSchedule 
-ON vw_StudentSchedule(Student_ID, Section_ID);
+CREATE UNIQUE CLUSTERED INDEX IDX_StudentSchedule
+ON dbo.vw_StudentSchedule (Student_ID, Section_ID);
 GO
 
 CREATE VIEW vw_SectionAvailability
@@ -400,10 +380,10 @@ SELECT
     ts.End_time,
     s.Building,
     s.Room_number
-FROM dbo.Section s
-INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
-LEFT JOIN dbo.Instructor i ON s.Instructor_ID = i.Instructor_ID
-LEFT JOIN dbo.Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID;
+FROM dbo.Section    AS s
+JOIN dbo.Course     AS c  ON s.Course_ID = c.Course_ID
+JOIN dbo.Instructor AS i  ON s.Instructor_ID = i.Instructor_ID
+JOIN dbo.Time_Slot  AS ts ON s.Time_slot_ID  = ts.Time_slot_ID;
 GO
 
 CREATE UNIQUE CLUSTERED INDEX IDX_SectionAvailability 
@@ -569,15 +549,10 @@ BEGIN
         DECLARE @MissingPrereqs VARCHAR(MAX);
         DECLARE @HasConflict BIT;
         DECLARE @ConflictDetails VARCHAR(MAX);
-        DECLARE @Semester VARCHAR(10);
-        DECLARE @Year INT;
         
-        SELECT 
-            @CourseID = Course_ID,
-            @Semester = Semester,
-            @Year = Year
-        FROM Section WHERE Section_ID = @SectionID;
+        SELECT @CourseID = Course_ID FROM Section WHERE Section_ID = @SectionID;
         
+        -- NEW: Check if already in cart for THIS section
         IF EXISTS (SELECT 1 FROM Shopping_Cart 
                    WHERE Student_ID = @StudentID 
                    AND Section_ID = @SectionID 
@@ -589,12 +564,11 @@ BEGIN
             RETURN;
         END
         
+        -- NEW: Check if already in cart for ANY section of the SAME COURSE
         IF EXISTS (
             SELECT 1 FROM Shopping_Cart sc
             INNER JOIN Section s ON sc.Section_ID = s.Section_ID
             WHERE sc.Student_ID = @StudentID 
-            AND s.Semester = @Semester
-            AND s.Year = @Year
             AND s.Course_ID = @CourseID
             AND sc.Status = 'Pending'
         )
@@ -605,6 +579,7 @@ BEGIN
             RETURN;
         END
         
+        -- NEW: Check if already enrolled in THIS section
         IF EXISTS (SELECT 1 FROM Takes 
                    WHERE Student_ID = @StudentID 
                    AND Section_ID = @SectionID)
@@ -615,6 +590,7 @@ BEGIN
             RETURN;
         END
         
+        -- NEW: Check if already enrolled OR completed ANY section of the SAME COURSE
         IF EXISTS (
             SELECT 1 FROM Takes t
             INNER JOIN Section s ON t.Section_ID = s.Section_ID
@@ -628,11 +604,7 @@ BEGIN
             RETURN;
         END
         
-        EXEC sp_CheckPrerequisites 
-            @StudentID, 
-            @CourseID, 
-            @HasPrereqs OUTPUT, 
-            @MissingPrereqs OUTPUT;
+        EXEC sp_CheckPrerequisites @StudentID, @CourseID, @HasPrereqs OUTPUT, @MissingPrereqs OUTPUT;
         
         IF @HasPrereqs = 0
         BEGIN
@@ -642,11 +614,7 @@ BEGIN
             RETURN;
         END
         
-        EXEC sp_CheckScheduleConflict 
-            @StudentID, 
-            @SectionID, 
-            @HasConflict OUTPUT, 
-            @ConflictDetails OUTPUT;
+        EXEC sp_CheckScheduleConflict @StudentID, @SectionID, @HasConflict OUTPUT, @ConflictDetails OUTPUT;
         
         IF @HasConflict = 1
         BEGIN
@@ -687,15 +655,10 @@ BEGIN
     BEGIN TRY
         DECLARE @CurrentEnroll INT;
         DECLARE @MaxEnroll INT;
-        DECLARE @Semester VARCHAR(10);
-        DECLARE @Year INT;
-        DECLARE @CurrentCourseCount INT;
         
         SELECT 
             @CurrentEnroll = Current_enrollment,
-            @MaxEnroll = Max_enrollment,
-            @Semester = Semester,
-            @Year = Year
+            @MaxEnroll = Max_enrollment
         FROM Section WHERE Section_ID = @SectionID;
         
         IF EXISTS (SELECT 1 FROM Takes WHERE Student_ID = @StudentID AND Section_ID = @SectionID)
@@ -710,22 +673,6 @@ BEGIN
         BEGIN
             SET @Success = 0;
             SET @Message = 'Section is full. No seats available.';
-            ROLLBACK TRANSACTION;
-            RETURN;
-        END
-        
-        SELECT @CurrentCourseCount = COUNT(*)
-        FROM Takes t
-        INNER JOIN Section s ON t.Section_ID = s.Section_ID
-        WHERE t.Student_ID = @StudentID
-        AND s.Semester = @Semester
-        AND s.Year = @Year
-        AND t.Grade IS NULL;
-        
-        IF @CurrentCourseCount >= 5
-        BEGIN
-            SET @Success = 0;
-            SET @Message = 'Registration failed: maximum of 5 courses (15 credits) per term.';
             ROLLBACK TRANSACTION;
             RETURN;
         END
@@ -762,7 +709,6 @@ BEGIN
     END CATCH
 END;
 GO
-
 
 CREATE OR ALTER PROCEDURE sp_RemoveFromCart
     @StudentID INT,
@@ -854,10 +800,4 @@ UNION ALL
 SELECT 'Sections', COUNT(*) FROM Section
 UNION ALL
 SELECT 'Prerequisites', COUNT(*) FROM Prerequisite;
-
-PRINT '';
-PRINT 'Section 1 (CMPT101) is FULL (30/30) - Test full class validation!';
-PRINT 'Multiple semesters available: Winter 2026, Spring 2026, Fall 2026';
-PRINT '15 credit limit enforced per term';
 GO
-
