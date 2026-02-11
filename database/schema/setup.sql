@@ -428,6 +428,7 @@ INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
 WHERE t.Grade IN ('A', 'A-', 'B+', 'B', 'B-', 'C+', 'C');
 GO
 
+--UNUSED FOR NOW CAUSE NOT MAIN PROCEDURE 
 CREATE UNIQUE CLUSTERED INDEX IDX_StudentCompleted 
 ON vw_StudentCompletedCourses(Student_ID, Course_ID);
 GO
@@ -438,6 +439,7 @@ GO
 PRINT 'Creating stored procedures...';
 GO
 
+--dont use this one for now cause not main
 CREATE OR ALTER PROCEDURE sp_CheckPrerequisites
     @StudentID INT,
     @CourseID VARCHAR(20),
@@ -871,7 +873,7 @@ SELECT 'Prerequisites', COUNT(*) FROM Prerequisite;
 -- all queries are serializable or transactions 
 
 -- app works by user clicking register sending post request to backend api/register 
--- sql recieves request and calls sp 
+-- sql recieves request and calls sp mw  
 --      where then sql starts serialiable transaction
 --      does validation
 --      then inserts /updates or rollback
