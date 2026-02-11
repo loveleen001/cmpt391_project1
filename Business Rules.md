@@ -81,4 +81,4 @@
    - `vw_SectionAvailability` - Real-time seat availability  
    - `vw_StudentCompletedCourses` - Passing grades only (for prerequisites)  
 2. Available seats are calculated as:  Max_enrollment - Current_enrollment
-3: Sections are marked unavailable when Current_enrollment >= Max_enrollment
+3. Sections are marked unavailable when Current_enrollment >= Max_enrollment
