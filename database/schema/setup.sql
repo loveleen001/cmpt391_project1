@@ -323,10 +323,10 @@ GO
 PRINT 'Creating materialized views...';
 GO
 
-CREATE VIEW vw_StudentSchedule
+CREATE VIEW dbo.vw_StudentSchedule
 WITH SCHEMABINDING
 AS
-SELECT 
+SELECT
     t.Student_ID,
     t.Section_ID,
     s.Course_ID,
@@ -343,15 +343,15 @@ SELECT
     s.Building,
     s.Room_number,
     t.Grade
-FROM dbo.Takes t
-INNER JOIN dbo.Section s ON t.Section_ID = s.Section_ID
-INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
-LEFT JOIN dbo.Instructor i ON s.Instructor_ID = i.Instructor_ID
-LEFT JOIN dbo.Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID;
+FROM dbo.Takes      AS t
+JOIN dbo.Section    AS s  ON t.Section_ID = s.Section_ID
+JOIN dbo.Course     AS c  ON s.Course_ID  = c.Course_ID
+JOIN dbo.Instructor AS i  ON s.Instructor_ID = i.Instructor_ID
+JOIN dbo.Time_Slot  AS ts ON s.Time_slot_ID  = ts.Time_slot_ID;
 GO
 
-CREATE UNIQUE CLUSTERED INDEX IDX_StudentSchedule 
-ON vw_StudentSchedule(Student_ID, Section_ID);
+CREATE UNIQUE CLUSTERED INDEX IDX_StudentSchedule
+ON dbo.vw_StudentSchedule (Student_ID, Section_ID);
 GO
 
 CREATE VIEW vw_SectionAvailability
@@ -380,10 +380,10 @@ SELECT
     ts.End_time,
     s.Building,
     s.Room_number
-FROM dbo.Section s
-INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
-LEFT JOIN dbo.Instructor i ON s.Instructor_ID = i.Instructor_ID
-LEFT JOIN dbo.Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID;
+FROM dbo.Section    AS s
+JOIN dbo.Course     AS c  ON s.Course_ID = c.Course_ID
+JOIN dbo.Instructor AS i  ON s.Instructor_ID = i.Instructor_ID
+JOIN dbo.Time_Slot  AS ts ON s.Time_slot_ID  = ts.Time_slot_ID;
 GO
 
 CREATE UNIQUE CLUSTERED INDEX IDX_SectionAvailability 
