@@ -1,20 +1,29 @@
+// Import React and React Hooks.
 import React, { useState, useEffect } from 'react';
+// Import axios Which is Used to Make HTTP Requests to the Backend API.
 import axios from 'axios';
 
+// Setting URL for Backend API
 const API_URL = 'http://localhost:5000/api';
 
-function AddCourseModal({ studentId, onAdd, onClose }) {
+// Add Course Function
+// Requires studentId, semester, year, onAdd and onClose as Input.
+function AddCourseModal({ studentId, semester, year, onAdd, onClose }) {
+  // Stores List of Available Courses
   const [availableSections, setAvailableSections] = useState([]);
+  // Stores List of Course Prequesistes
   const [prerequisites, setPrerequisites] = useState({});
+  // Tracks If Data is Loading.
   const [loading, setLoading] = useState(true);
+  // Stores The Users Seach Input.
   const [searchTerm, setSearchTerm] = useState('');
-  const [semester] = useState('Winter');
-  const [year] = useState(2026);
 
+  // Runs When searchTerm, semester or year Changes, To Update Page Results.
   useEffect(() => {
     fetchSections();
-  }, [searchTerm]);
+  }, [searchTerm, semester, year]); // Added dependencies
 
+  // Grab Sections That Are Available from The Backend.
   const fetchSections = async () => {
     try {
       const response = await axios.get(`${API_URL}/sections/available`, {
@@ -22,47 +31,51 @@ function AddCourseModal({ studentId, onAdd, onClose }) {
       });
       setAvailableSections(response.data);
       
-      // Fetch prerequisites for each unique course
+      // Fetch prerequisites for each unique course.
       const uniqueCourses = [...new Set(response.data.map(s => s.Course_ID))];
+      // Create Request To Fetch Prerequisites for Each Course.
       const prereqPromises = uniqueCourses.map(courseId => 
         axios.get(`${API_URL}/course/${courseId}/prerequisites`)
           .then(res => ({ courseId, prereqs: res.data }))
           .catch(() => ({ courseId, prereqs: [] }))
       );
       
+      // Wait For All Prequesite Requests.
       const prereqResults = await Promise.all(prereqPromises);
+      // Convert Results Into an Object Map.
       const prereqMap = {};
       prereqResults.forEach(({ courseId, prereqs }) => {
         prereqMap[courseId] = prereqs;
       });
       
+      // Save Prerequisites Map to State
       setPrerequisites(prereqMap);
+      // Stop Loading Once All is Fetched.
       setLoading(false);
+    // In The Case of an Error run console.error and Stop Loading.
     } catch (err) {
       console.error('Error fetching sections:', err);
       setLoading(false);
     }
   };
 
+  // Converts 24 Hour Time Format to 12 Hour Time Format.
   const formatTime = (timeString) => {
     if (!timeString) return 'TBA';
     
-    if (timeString.includes(':')) {
-      const parts = timeString.split(':');
-      const hours = parseInt(parts[0]);
-      const minutes = parts[1];
-      
-      if (hours === 0) return 'TBA';
-      
-      const period = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
-      
-      return `${displayHours}:${minutes}${period}`;
-    }
+    // timeString is now "HH:MM" format from backend
+    const [hours, minutes] = timeString.split(':').map(Number);
     
-    return timeString;
+    if (hours === 0) return 'TBA';
+    
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+    
+    // Return Reformated Time.
+    return `${displayHours}:${minutes.toString().padStart(2, '0')}${period}`;
   };
 
+  // JSX Returned.
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -91,7 +104,7 @@ function AddCourseModal({ studentId, onAdd, onClose }) {
                   <div>
                     <h4>{section.Course_ID} - {section.Course_name}</h4>
                     
-                    {/* NEW: Show Prerequisites */}
+                    {/* Show Prerequisites */}
                     {prerequisites[section.Course_ID] && prerequisites[section.Course_ID].length > 0 && (
                       <p className="prerequisites-info">
                         <strong>Prerequisites:</strong> {prerequisites[section.Course_ID].map(p => p.Prereq_course_ID).join(', ')}
@@ -121,4 +134,5 @@ function AddCourseModal({ studentId, onAdd, onClose }) {
   );
 }
 
+// Exporting The Component So it Can Be Used In Other Files.
 export default AddCourseModal;

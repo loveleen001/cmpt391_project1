@@ -1,18 +1,29 @@
+// Import React and useState Hook.
 import React, { useState } from 'react';
 
+// Function for Returning a CourseCard Component, Used in ClassList.jsx
+// Requires course and status as Input.
 function CourseCard({ course, status }) {
+  // Controls Wether The Course Details are Visible or Not (Expanded vs Collapsed).
   const [expanded, setExpanded] = useState(true);
 
+  // Formats Time String To HH:MM Format.
   const formatTime = (timeString) => {
     if (!timeString) return '';
     return timeString.substring(0, 5);
   };
 
+  // JSX Returned.
   return (
     <div className="course-card">
       <div className="course-header" onClick={() => setExpanded(!expanded)}>
         <span className="expand-icon">{expanded ? '▼' : '▶'}</span>
-        <h3>{course.Course_ID} {course.Course_name}</h3>
+        <h3>
+          {course.Course_ID} {course.Course_name}
+          <span className="term-tag">
+            ({course.Semester} {course.Year} · Section {course.Section_ID})
+          </span>
+        </h3>
       </div>
 
       {expanded && (
@@ -46,4 +57,5 @@ function CourseCard({ course, status }) {
   );
 }
 
+// Exporting The Component So it Can Be Used In Other Files.
 export default CourseCard;
