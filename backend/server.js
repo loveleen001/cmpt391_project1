@@ -39,9 +39,6 @@ async function connectDB() {
     }
 }
 
-// Run Connect To Database Function.
-connectDB();
-
 // Test If The Backend Is Working.
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Backend is running!' });
@@ -367,13 +364,19 @@ app.get('/api/course/:courseId/prerequisites', async (req, res) => {
     }
 });
 
-// Grabs PORT from .env File or Defaults to 5000.
-const PORT = process.env.PORT || 5000;
-// Listen For HTTP Requests on PORT
-app.listen(PORT, () => {
-    // console.log For Visibility In Terminal.
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📊 Database: ${config.database}`);
-    console.log(`💻 Server: ${config.server}`);
-});
+// FIXED: Start server only AFTER database connection is established
+async function startServer() {
+    // Connect to database first
+    await connectDB();
+    
+    // THEN start the server
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+        console.log(`📊 Database: ${config.database}`);
+        console.log(`💻 Server: ${config.server}`);
+    });
+}
 
+// Run the startup function
+startServer();

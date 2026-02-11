@@ -152,3 +152,4 @@ INSERT INTO Section (Course_ID, Semester, Year, Instructor_ID, Time_slot_ID, Bui
 PRINT 'Additional semester sections added!';
 GO
 
+/*test reg log */
