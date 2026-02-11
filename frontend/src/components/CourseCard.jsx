@@ -3,9 +3,24 @@ import React, { useState } from 'react';
 function CourseCard({ course, status }) {
   const [expanded, setExpanded] = useState(true);
 
-  const formatTime = (timeString) => {
-    if (!timeString) return '';
-    return timeString.substring(0, 5);
+  const formatTime = (value) => {
+    if (!value) return 'TBA';
+
+    // If backend returns Date object
+    if (value instanceof Date) {
+      return value.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // If backend returns string like "1970-01-01T08:00:00.000Z"
+    if (typeof value === 'string' && value.includes('T')) {
+      return value.substring(11, 16);
+    }
+
+    // If backend returns "08:00:00"
+    return value.substring(0, 5);
   };
 
   return (
