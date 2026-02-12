@@ -343,10 +343,11 @@ GO
 PRINT 'Creating materialized views...';
 GO
 
-CREATE VIEW vw_StudentSchedule
+-- FIXED: Changed to INNER JOIN for proper indexing
+CREATE VIEW dbo.vw_StudentSchedule
 WITH SCHEMABINDING
 AS
-SELECT 
+SELECT
     t.Student_ID,
     t.Section_ID,
     s.Course_ID,
@@ -363,17 +364,18 @@ SELECT
     s.Building,
     s.Room_number,
     t.Grade
-FROM dbo.Takes t
-INNER JOIN dbo.Section s ON t.Section_ID = s.Section_ID
-INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
-LEFT JOIN dbo.Instructor i ON s.Instructor_ID = i.Instructor_ID
-LEFT JOIN dbo.Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID;
+FROM dbo.Takes      AS t
+JOIN dbo.Section    AS s  ON t.Section_ID = s.Section_ID
+JOIN dbo.Course     AS c  ON s.Course_ID  = c.Course_ID
+JOIN dbo.Instructor AS i  ON s.Instructor_ID = i.Instructor_ID
+JOIN dbo.Time_Slot  AS ts ON s.Time_slot_ID  = ts.Time_slot_ID;
 GO
 
 CREATE UNIQUE CLUSTERED INDEX IDX_StudentSchedule 
-ON vw_StudentSchedule(Student_ID, Section_ID);
+ON dbo.vw_StudentSchedule(Student_ID, Section_ID);
 GO
 
+-- FIXED: Changed to INNER JOIN for proper indexing
 CREATE VIEW vw_SectionAvailability
 WITH SCHEMABINDING
 AS
@@ -400,10 +402,10 @@ SELECT
     ts.End_time,
     s.Building,
     s.Room_number
-FROM dbo.Section s
-INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
-LEFT JOIN dbo.Instructor i ON s.Instructor_ID = i.Instructor_ID
-LEFT JOIN dbo.Time_Slot ts ON s.Time_slot_ID = ts.Time_slot_ID;
+FROM dbo.Section    AS s
+JOIN dbo.Course     AS c  ON s.Course_ID = c.Course_ID
+JOIN dbo.Instructor AS i  ON s.Instructor_ID = i.Instructor_ID
+JOIN dbo.Time_Slot  AS ts ON s.Time_slot_ID  = ts.Time_slot_ID;
 GO
 
 CREATE UNIQUE CLUSTERED INDEX IDX_SectionAvailability 
@@ -426,6 +428,7 @@ INNER JOIN dbo.Course c ON s.Course_ID = c.Course_ID
 WHERE t.Grade IN ('A', 'A-', 'B+', 'B', 'B-', 'C+', 'C');
 GO
 
+--UNUSED FOR NOW CAUSE NOT MAIN PROCEDURE 
 CREATE UNIQUE CLUSTERED INDEX IDX_StudentCompleted 
 ON vw_StudentCompletedCourses(Student_ID, Course_ID);
 GO
@@ -436,6 +439,7 @@ GO
 PRINT 'Creating stored procedures...';
 GO
 
+--dont use this one for now cause not main
 CREATE OR ALTER PROCEDURE sp_CheckPrerequisites
     @StudentID INT,
     @CourseID VARCHAR(20),
@@ -855,9 +859,24 @@ SELECT 'Sections', COUNT(*) FROM Section
 UNION ALL
 SELECT 'Prerequisites', COUNT(*) FROM Prerequisite;
 
-PRINT '';
-PRINT 'Section 1 (CMPT101) is FULL (30/30) - Test full class validation!';
-PRINT 'Multiple semesters available: Winter 2026, Spring 2026, Fall 2026';
-PRINT '15 credit limit enforced per term';
-GO
+-- SELECT *
+-- FROM Registration_Log
+-- ORDER BY Action_date DESC;
 
+
+-- little bit of design justification here 
+-- transactions for rollback if anything fails so no half baked changes are pushed
+-- validation rules exist ofc like credit count, end time > start time etc
+-- mviews for saved queries that run fresh everytime we have for student scehdulel and commpleted courses
+-- sp's we have for shopping cart and register and some validation rules like check prereqs or sched conflict 
+
+-- all queries are serializable or transactions 
+
+-- app works by user clicking register sending post request to backend api/register 
+-- sql recieves request and calls sp mw  
+--      where then sql starts serialiable transaction
+--      does validation
+--      then inserts /updates or rollback
+-- backend gets the response then sends that messge back to the frontend 
+
+-- this maintains security 
